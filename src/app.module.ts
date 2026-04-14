@@ -10,6 +10,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { envValidationSchema } from './config/env.validation';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AdminEntity } from './database/entities/admin.entity';
+import { JoinRequestEntity } from './database/entities/join-request.entity';
+import { ContactMessageEntity } from './database/entities/contact-message.entity';
+import { NotificationEntity } from './database/entities/notification.entity';
+import { AdminOtpCodeEntity } from './database/entities/admin-otp-code.entity';
+import { AdminPasswordResetLogEntity } from './database/entities/admin-password-reset-log.entity';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
@@ -33,6 +39,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
     //DB connection
     TypeOrmModule.forRootAsync({
+      
       inject:[ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -41,7 +48,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
-        autoLoadEntities: true,
+        entities: [ //register entities
+          AdminEntity,
+          JoinRequestEntity,
+          ContactMessageEntity,
+          NotificationEntity,
+          AdminOtpCodeEntity,
+          AdminPasswordResetLogEntity,
+        ],
+        autoLoadEntities: false, //automatic load entities
         synchronize: false,
         logging: configService.get<boolean>('DB_LOGGING'),
       }),
