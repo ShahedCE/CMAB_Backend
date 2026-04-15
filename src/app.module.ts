@@ -29,7 +29,7 @@ import { AdminPasswordResetLogEntity } from './database/entities/admin-password-
       envFilePath:
         // Here, the environment condition is being checked.
         // If it is a production environment (NODE_ENV === 'production'),
-        // then it will use the '.env.production' file.
+        // then it will use the '.env.production' file..
         // Otherwise, it will use the '.env.development' file.
         process.env.NODE_ENV === 'production'
           ? '.env.production'
