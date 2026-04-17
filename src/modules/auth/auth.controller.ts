@@ -14,7 +14,7 @@ export class AuthController {
   login(@Body() body: LoginDto) {
     return this.authService.login(body);
   }
-
+ //First forgot then varify otp then reset password
   @Post('forgot-password')
   forgotPassword(@Body() body: ForgotPasswordDto, @Req() req: Request) {
     return this.authService.forgotPassword(body, {
