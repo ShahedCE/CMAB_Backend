@@ -16,6 +16,7 @@ import { ContactMessageEntity } from './database/entities/contact-message.entity
 import { NotificationEntity } from './database/entities/notification.entity';
 import { AdminOtpCodeEntity } from './database/entities/admin-otp-code.entity';
 import { AdminPasswordResetLogEntity } from './database/entities/admin-password-reset-log.entity';
+import { MemberEntity } from './database/entities/member.entity';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
@@ -55,6 +56,7 @@ import { AdminPasswordResetLogEntity } from './database/entities/admin-password-
           NotificationEntity,
           AdminOtpCodeEntity,
           AdminPasswordResetLogEntity,
+          MemberEntity,
         ],
         autoLoadEntities: false, //automatic load entities
         synchronize: false,

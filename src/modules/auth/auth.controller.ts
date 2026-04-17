@@ -11,12 +11,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() body: LoginDto) {
+  async login(@Body() body: LoginDto) {
     return this.authService.login(body);
   }
  //First forgot then varify otp then reset password
   @Post('forgot-password')
-  forgotPassword(@Body() body: ForgotPasswordDto, @Req() req: Request) {
+  async forgotPassword(@Body() body: ForgotPasswordDto, @Req() req: Request) {
     return this.authService.forgotPassword(body, {
       ip: req.ip ?? null,
       userAgent: req.headers['user-agent'] ?? null,
@@ -24,12 +24,12 @@ export class AuthController {
   }
 
   @Post('verify-otp')
-  verifyOtp(@Body() body: VerifyOtpDto) {
+  async verifyOtp(@Body() body: VerifyOtpDto) {
     return this.authService.verifyOtp(body);
   }
 
   @Post('reset-password')
-  resetPassword(@Body() body: ResetPasswordDto, @Req() req: Request) {
+  async resetPassword(@Body() body: ResetPasswordDto, @Req() req: Request) {
     return this.authService.resetPassword(body, {
       ip: req.ip ?? null,
       userAgent: req.headers['user-agent'] ?? null,
