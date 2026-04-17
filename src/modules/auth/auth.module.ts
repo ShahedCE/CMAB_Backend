@@ -7,6 +7,8 @@ import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AdminEntity } from '../../database/entities/admin.entity';
+import { AdminOtpCodeEntity } from '../../database/entities/admin-otp-code.entity';
+import { AdminPasswordResetLogEntity } from '../../database/entities/admin-password-reset-log.entity';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
@@ -29,7 +31,11 @@ import { JwtStrategy } from './jwt.strategy';
         };
       },
     }),
-    TypeOrmModule.forFeature([AdminEntity]),
+    TypeOrmModule.forFeature([
+      AdminEntity,
+      AdminOtpCodeEntity,
+      AdminPasswordResetLogEntity,
+    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

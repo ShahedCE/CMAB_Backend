@@ -29,7 +29,7 @@ async function bootstrap() {
       return;
     }
 
-    const passwordHash = await hash(password, 10);
+    const passwordHash = await hash(password, 10); 
     const admin = adminRepository.create({
       name,
       email,
@@ -41,7 +41,8 @@ async function bootstrap() {
 
     await adminRepository.save(admin);
     console.log(`Admin created successfully: ${email}`);
-  } finally {
+  } 
+  finally {
     await app.close();
   }
 }
