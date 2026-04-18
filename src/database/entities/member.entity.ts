@@ -24,8 +24,8 @@ export class MemberEntity {
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id!: string;
 
-  @Column({ type: 'bigint', name: 'join_request_id', unique: true })
-  joinRequestId!: string;
+  @Column({ type: 'bigint', name: 'join_request_id',nullable: true, unique: true })
+  joinRequestId!: string| null;
 
   @ManyToOne(() => JoinRequestEntity, {
     nullable: false,
@@ -58,7 +58,7 @@ export class MemberEntity {
   @Column({ type: 'varchar', length: 50, name: 'membership_type' })
   membershipType!: string;
 
-  @Column({ type: 'varchar', length: 190 })
+  @Column({ type: 'varchar', length: 190, unique: true })
   email!: string;
 
   @Column({ type: 'varchar', length: 30 })

@@ -17,11 +17,12 @@ import { NotificationEntity } from './database/entities/notification.entity';
 import { AdminOtpCodeEntity } from './database/entities/admin-otp-code.entity';
 import { AdminPasswordResetLogEntity } from './database/entities/admin-password-reset-log.entity';
 import { MemberEntity } from './database/entities/member.entity';
+import { JoinRequestsModule } from './modules/join-requests/join-request.module';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     AuthModule, ContactModule, ActivitiesModule, 
-    MembersModule, NotificationsModule,
+    MembersModule, NotificationsModule,JoinRequestsModule,
 
     
     //.env files are globally available throughout the application.

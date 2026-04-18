@@ -1,51 +1,57 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   Param,
   Patch,
-  Post,
+  Query,
+  Body,
   UseGuards,
+  Post,
+  Req,
 } from '@nestjs/common';
+import { MembersService } from './members.service';
+import { MemberListQueryDto } from './dto/member-list-query.dto';
+import { UpdateMemberDto } from './dto/update-member.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateMemberDto } from './dto/create-member.dto';
-import { UpdateMemberDto } from './dto/update-member.dto';
-import { MembersService } from './members.service';
 
+// Admin only
+// @Roles('admin')
 @Controller('members')
 export class MembersController {
   constructor(private readonly membersService: MembersService) {}
 
+  //Manual member Creation endpoint for admins.
+@Post()
+@UseGuards(JwtAuthGuard)
+create(
+  @Body() dto: CreateMemberDto,
+  @Req() req: any,
+) {
+  return this.membersService.createMember(dto, req.user.id);
+}
+
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.membersService.findAll();
+  findAll(@Query() query: MemberListQueryDto) {
+    return this.membersService.findAll(query);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.membersService.findOne(id);
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() body: CreateMemberDto) {
-    return this.membersService.create(body);
-  }
-
+  @UseGuards(JwtAuthGuard)  
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() body: UpdateMemberDto) {
-    return this.membersService.update(id, body);
+  update(@Param('id') id: string, @Body() dto: UpdateMemberDto) {
+    return this.membersService.update(id, dto);
   }
-
-  @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string) {
-    await this.membersService.remove(id);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.membersService.remove(id);
   }
 }

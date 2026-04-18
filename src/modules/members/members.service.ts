@@ -1,305 +1,301 @@
 import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { JoinRequestEntity } from '../../database/entities/join-request.entity';
 import { MemberEntity } from '../../database/entities/member.entity';
-import { CreateMemberDto } from './dto/create-member.dto';
+import { MemberListQueryDto } from './dto/member-list-query.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
+import { DirectoryMemberAddedPayload,
+   DirectoryMemberDeletedPayload,
+    DirectoryMemberUpdatedPayload } from './member.events';
+import { CreateMemberDto } from './dto/create-member.dto';
 
-export type JoinRequestCreatedPayload = {
-  id: string;
-  fullNameEn: string;
-  email: string;
-  createdAt: Date;
-};
-
-export type JoinRequestUpdatedPayload = {
-  id: string;
-  fullNameEn: string;
-  email: string;
-};
-
-export type JoinRequestDeletedPayload = {
-  id: string;
-  fullNameEn: string;
-  email: string;
-};
-
-export type DirectoryMemberAddedPayload = {
-  memberId: string;
-  joinRequestId: string;
-  fullNameEn: string;
-  email: string;
-};
-
-export type DirectoryMemberUpdatedPayload = {
-  memberId: string;
-  joinRequestId: string;
-  fullNameEn: string;
-  email: string;
-};
 
 @Injectable()
 export class MembersService {
   constructor(
-    @InjectRepository(JoinRequestEntity)
-    private readonly joinRequestRepository: Repository<JoinRequestEntity>,
     @InjectRepository(MemberEntity)
-    private readonly memberRepository: Repository<MemberEntity>,
+    private readonly memberRepo: Repository<MemberEntity>,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  findAll(): Promise<JoinRequestEntity[]> {
-    return this.joinRequestRepository.find({
-      order: { createdAt: 'DESC' },
+  //Implementing manual member creation
+async createMember(
+  dto: CreateMemberDto,
+  adminId: string,
+): Promise<MemberEntity> {
+  const normalizedEmail = dto.email.trim().toLowerCase();
+
+  const existing = await this.memberRepo.findOne({
+    where: { email: normalizedEmail },
+  });
+
+  if (existing) {
+    throw new ConflictException('A member with this email already exists');
+  }
+
+  const member = this.memberRepo.create({
+    fullNameBn: dto.fullNameBn.trim(),
+    fullNameEn: dto.fullNameEn.trim(),
+    fatherName: dto.fatherName.trim(),
+    motherName: dto.motherName.trim(),
+    dateOfBirth: dto.dateOfBirth,
+    nationalId: dto.nationalId.trim(),
+    medicalRegNo: dto.medicalRegNo.trim(),
+    membershipType: dto.membershipType.trim(),
+    email: normalizedEmail,
+    mobile: dto.mobile.trim(),
+    phone: dto.phone?.trim() || null,
+    presentVillage: dto.presentVillage.trim(),
+    presentPost: dto.presentPost.trim(),
+    presentThana: dto.presentThana.trim(),
+    presentDistrict: dto.presentDistrict.trim(),
+    permanentVillage: dto.permanentVillage.trim(),
+    permanentPost: dto.permanentPost.trim(),
+    permanentThana: dto.permanentThana.trim(),
+    permanentDistrict: dto.permanentDistrict.trim(),
+    specialty: dto.specialty?.trim() || null,
+    educationEntries: dto.educationEntries,
+    workplaceTypes: dto.workplaceTypes,
+    entryFee: dto.entryFee.toFixed(2),
+    annualFee: dto.annualFee.toFixed(2),
+    lifetimeFee: dto.lifetimeFee.toFixed(2),
+    declarationAccepted: dto.declarationAccepted,
+    notes: dto.notes.trim(),
+    profileImageUrl: dto.profileImageUrl?.trim() || null,
+    joinRequestId: null,
+    approvedAt: new Date(),
+    approvedByAdminId: adminId,
+    isActive: true,
+  });
+
+  const saved = await this.memberRepo.save(member);
+
+  this.eventEmitter.emit('directory.member.added', {
+    memberId: saved.id,
+    joinRequestId: saved.joinRequestId,
+    fullNameEn: saved.fullNameEn,
+    email: saved.email,
+  } satisfies DirectoryMemberAddedPayload);
+
+  return saved;
+}
+  async createFromApprovedJoinRequest(
+    manager: EntityManager,
+    joinRequest: JoinRequestEntity,
+    adminId: string | null,
+  ): Promise<MemberEntity> {
+    const repo = manager.getRepository(MemberEntity);
+
+    const existing = await repo.findOne({
+      where: { joinRequestId: joinRequest.id },
     });
-  }
 
-  async findOne(id: string): Promise<JoinRequestEntity> {
-    const row = await this.joinRequestRepository.findOne({ where: { id } });
-    if (!row) {
-      throw new NotFoundException('Member not found');
+    if (existing) {
+      return existing;
     }
-    return row;
-  }
 
-  async create(dto: CreateMemberDto): Promise<JoinRequestEntity> {
-    const row = this.joinRequestRepository.create({
-      fullNameBn: dto.fullNameBn.trim(),
-      fullNameEn: dto.fullNameEn.trim(),
-      fatherName: dto.fatherName.trim(),
-      motherName: dto.motherName.trim(),
-      dateOfBirth: dto.dateOfBirth,
-      nationalId: dto.nationalId.trim(),
-      medicalRegNo: dto.medicalRegNo.trim(),
-      membershipType: dto.membershipType.trim(),
-      email: dto.email.trim().toLowerCase(),
-      mobile: dto.mobile.trim(),
-      phone: dto.phone?.trim() ?? null,
-      presentVillage: dto.presentVillage.trim(),
-      presentPost: dto.presentPost.trim(),
-      presentThana: dto.presentThana.trim(),
-      presentDistrict: dto.presentDistrict.trim(),
-      permanentVillage: dto.permanentVillage.trim(),
-      permanentPost: dto.permanentPost.trim(),
-      permanentThana: dto.permanentThana.trim(),
-      permanentDistrict: dto.permanentDistrict.trim(),
-      specialty: dto.specialty?.trim() ?? null,
-      educationEntries: dto.educationEntries,
-      workplaceTypes: dto.workplaceTypes,
-      entryFee: String(dto.entryFee),
-      annualFee: String(dto.annualFee),
-      lifetimeFee: String(dto.lifetimeFee),
-      declarationAccepted: dto.declarationAccepted,
-      notes: dto.notes.trim(),
-      profileImageUrl: dto.profileImageUrl?.trim() ?? null,
-      status: dto.status ?? 'pending',
-      reviewedByAdminId: null,
-      reviewedAt: null,
-      rejectionReason: null,
+    const duplicateEmail = await repo.findOne({
+      where: { email: joinRequest.email },
+      select: ['id', 'email'],
     });
 
-    await this.joinRequestRepository.save(row);
+    if (duplicateEmail) {
+      throw new ConflictException('Another member already exists with this email');
+    }
 
-    this.eventEmitter.emit('join_request.created', {
-      id: row.id,
-      fullNameEn: row.fullNameEn,
-      email: row.email,
-      createdAt: row.createdAt,
-    } satisfies JoinRequestCreatedPayload);
+    const row = repo.create({
+      joinRequestId: joinRequest.id,
+      fullNameBn: joinRequest.fullNameBn,
+      fullNameEn: joinRequest.fullNameEn,
+      fatherName: joinRequest.fatherName,
+      motherName: joinRequest.motherName,
+      dateOfBirth: joinRequest.dateOfBirth,
+      nationalId: joinRequest.nationalId,
+      medicalRegNo: joinRequest.medicalRegNo,
+      membershipType: joinRequest.membershipType,
+      email: joinRequest.email,
+      mobile: joinRequest.mobile,
+      phone: joinRequest.phone,
+      presentVillage: joinRequest.presentVillage,
+      presentPost: joinRequest.presentPost,
+      presentThana: joinRequest.presentThana,
+      presentDistrict: joinRequest.presentDistrict,
+      permanentVillage: joinRequest.permanentVillage,
+      permanentPost: joinRequest.permanentPost,
+      permanentThana: joinRequest.permanentThana,
+      permanentDistrict: joinRequest.permanentDistrict,
+      specialty: joinRequest.specialty,
+      educationEntries: joinRequest.educationEntries,
+      workplaceTypes: joinRequest.workplaceTypes,
+      entryFee: joinRequest.entryFee,
+      annualFee: joinRequest.annualFee,
+      lifetimeFee: joinRequest.lifetimeFee,
+      declarationAccepted: joinRequest.declarationAccepted,
+      notes: joinRequest.notes,
+      profileImageUrl: joinRequest.profileImageUrl,
+      approvedAt: new Date(),
+      approvedByAdminId: adminId,
+      isActive: true,
+    });
 
-    await this.syncDirectoryMemberFromJoinRequest(row);
+    const saved = await repo.save(row);
 
-    return row;
+    this.eventEmitter.emit('directory.member.added', {
+      memberId: saved.id,
+      joinRequestId: saved.joinRequestId || null,
+      fullNameEn: saved.fullNameEn,
+      email: saved.email,
+    } satisfies DirectoryMemberAddedPayload);
+
+    return saved;
   }
 
-  async update(id: string, dto: UpdateMemberDto): Promise<JoinRequestEntity> {
-    const row = await this.joinRequestRepository.findOne({ where: { id } });
-    if (!row) {
-      throw new NotFoundException('Member not found');
+  async findAll(query: MemberListQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+
+    const qb = this.memberRepo.createQueryBuilder('m');
+
+    if (query.search) {
+      qb.andWhere(
+        `
+        (
+          LOWER(m.fullNameEn) LIKE LOWER(:search)
+          OR LOWER(m.fullNameBn) LIKE LOWER(:search)
+          OR LOWER(m.email) LIKE LOWER(:search)
+          OR LOWER(m.mobile) LIKE LOWER(:search)
+          OR LOWER(m.medicalRegNo) LIKE LOWER(:search)
+        )
+        `,
+        { search: `%${query.search}%` },
+      );
     }
 
-    if (dto.fullNameBn !== undefined) row.fullNameBn = dto.fullNameBn.trim();
-    if (dto.fullNameEn !== undefined) row.fullNameEn = dto.fullNameEn.trim();
-    if (dto.fatherName !== undefined) row.fatherName = dto.fatherName.trim();
-    if (dto.motherName !== undefined) row.motherName = dto.motherName.trim();
-    if (dto.dateOfBirth !== undefined) row.dateOfBirth = dto.dateOfBirth;
-    if (dto.nationalId !== undefined) row.nationalId = dto.nationalId.trim();
-    if (dto.medicalRegNo !== undefined) {
-      row.medicalRegNo = dto.medicalRegNo.trim();
-    }
-    if (dto.membershipType !== undefined) {
-      row.membershipType = dto.membershipType.trim();
-    }
-    if (dto.email !== undefined) row.email = dto.email.trim().toLowerCase();
-    if (dto.mobile !== undefined) row.mobile = dto.mobile.trim();
-    if (dto.phone !== undefined) row.phone = dto.phone?.trim() ?? null;
-    if (dto.presentVillage !== undefined) {
-      row.presentVillage = dto.presentVillage.trim();
-    }
-    if (dto.presentPost !== undefined) row.presentPost = dto.presentPost.trim();
-    if (dto.presentThana !== undefined) {
-      row.presentThana = dto.presentThana.trim();
-    }
-    if (dto.presentDistrict !== undefined) {
-      row.presentDistrict = dto.presentDistrict.trim();
-    }
-    if (dto.permanentVillage !== undefined) {
-      row.permanentVillage = dto.permanentVillage.trim();
-    }
-    if (dto.permanentPost !== undefined) {
-      row.permanentPost = dto.permanentPost.trim();
-    }
-    if (dto.permanentThana !== undefined) {
-      row.permanentThana = dto.permanentThana.trim();
-    }
-    if (dto.permanentDistrict !== undefined) {
-      row.permanentDistrict = dto.permanentDistrict.trim();
-    }
-    if (dto.specialty !== undefined) {
-      row.specialty = dto.specialty?.trim() ?? null;
-    }
-    if (dto.educationEntries !== undefined) {
-      row.educationEntries = dto.educationEntries;
-    }
-    if (dto.workplaceTypes !== undefined) {
-      row.workplaceTypes = dto.workplaceTypes;
-    }
-    if (dto.entryFee !== undefined) row.entryFee = String(dto.entryFee);
-    if (dto.annualFee !== undefined) row.annualFee = String(dto.annualFee);
-    if (dto.lifetimeFee !== undefined) {
-      row.lifetimeFee = String(dto.lifetimeFee);
-    }
-    if (dto.declarationAccepted !== undefined) {
-      row.declarationAccepted = dto.declarationAccepted;
-    }
-    if (dto.notes !== undefined) row.notes = dto.notes.trim();
-    if (dto.profileImageUrl !== undefined) {
-      row.profileImageUrl = dto.profileImageUrl?.trim() ?? null;
-    }
-    if (dto.status !== undefined) row.status = dto.status;
-
-    await this.joinRequestRepository.save(row);
-
-    this.eventEmitter.emit('join_request.updated', {
-      id: row.id,
-      fullNameEn: row.fullNameEn,
-      email: row.email,
-    } satisfies JoinRequestUpdatedPayload);
-
-    await this.syncDirectoryMemberFromJoinRequest(row);
-
-    return row;
-  }
-
-  async remove(id: string): Promise<void> {
-    const row = await this.joinRequestRepository.findOne({ where: { id } });
-    if (!row) {
-      throw new NotFoundException('Member not found');
+    if (query.membershipType) {
+      qb.andWhere('m.membershipType = :membershipType', {
+        membershipType: query.membershipType,
+      });
     }
 
-    const payload: JoinRequestDeletedPayload = {
-      id: row.id,
-      fullNameEn: row.fullNameEn,
-      email: row.email,
+    if (query.isActive !== undefined) {
+      qb.andWhere('m.isActive = :isActive', {
+        isActive: query.isActive === 'true',
+      });
+    }
+
+    qb.orderBy('m.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
-
-    await this.joinRequestRepository.remove(row);
-    this.eventEmitter.emit('join_request.deleted', payload);
   }
 
-  /**
-   * When `join_requests.status` is `approved`, upsert full snapshot into `members`.
-   * Otherwise mark directory row inactive (keeps history).
-   */
-  private async syncDirectoryMemberFromJoinRequest(
-    join: JoinRequestEntity,
-  ): Promise<void> {
-    if (join.status !== 'approved') {
-      const existing = await this.memberRepository.findOne({
-        where: { joinRequestId: join.id },
-      });
-      if (existing?.isActive) {
-        existing.isActive = false;
-        await this.memberRepository.save(existing);
-      }
-      return;
-    }
+  async findOne(id: string): Promise<MemberEntity> {
+    this.ensureNumericId(id);
 
-    const snapshot = this.snapshotFromJoinRequest(join);
-    const approvedAt = join.reviewedAt ?? new Date();
-    const approvedByAdminId = join.reviewedByAdminId;
-
-    let member = await this.memberRepository.findOne({
-      where: { joinRequestId: join.id },
+    const row = await this.memberRepo.findOne({
+      where: { id },
+      relations: ['approvedByAdmin', 'joinRequest'],
     });
 
-    if (!member) {
-      member = this.memberRepository.create({
-        joinRequestId: join.id,
-        ...snapshot,
-        approvedAt,
-        approvedByAdminId,
-        isActive: true,
-      });
-      await this.memberRepository.save(member);
-      this.eventEmitter.emit('directory.member.added', {
-        memberId: member.id,
-        joinRequestId: join.id,
-        fullNameEn: member.fullNameEn,
-        email: member.email,
-      } satisfies DirectoryMemberAddedPayload);
-      return;
+    if (!row) {
+      throw new NotFoundException('Member not found');
     }
 
-    Object.assign(member, snapshot);
-    member.approvedAt = approvedAt;
-    member.approvedByAdminId = approvedByAdminId;
-    member.isActive = true;
-    await this.memberRepository.save(member);
+    return row;
+  }
+
+  async update(id: string, dto: UpdateMemberDto): Promise<MemberEntity> {
+    const member = await this.findOne(id);
+
+    if (dto.email && dto.email.trim().toLowerCase() !== member.email) {
+      const duplicate = await this.memberRepo.findOne({
+        where: { email: dto.email.trim().toLowerCase() },
+      });
+
+      if (duplicate && duplicate.id !== member.id) {
+        throw new ConflictException('Another member already exists with this email');
+      }
+    }
+
+    Object.assign(member, {
+      ...dto,
+      fullNameBn: dto.fullNameBn?.trim() ?? member.fullNameBn,
+      fullNameEn: dto.fullNameEn?.trim() ?? member.fullNameEn,
+      fatherName: dto.fatherName?.trim() ?? member.fatherName,
+      motherName: dto.motherName?.trim() ?? member.motherName,
+      membershipType: dto.membershipType?.trim() ?? member.membershipType,
+      email: dto.email?.trim().toLowerCase() ?? member.email,
+      mobile: dto.mobile?.trim() ?? member.mobile,
+      phone: dto.phone === undefined ? member.phone : dto.phone?.trim() || null,
+      presentVillage: dto.presentVillage?.trim() ?? member.presentVillage,
+      presentPost: dto.presentPost?.trim() ?? member.presentPost,
+      presentThana: dto.presentThana?.trim() ?? member.presentThana,
+      presentDistrict: dto.presentDistrict?.trim() ?? member.presentDistrict,
+      permanentVillage: dto.permanentVillage?.trim() ?? member.permanentVillage,
+      permanentPost: dto.permanentPost?.trim() ?? member.permanentPost,
+      permanentThana: dto.permanentThana?.trim() ?? member.permanentThana,
+      permanentDistrict: dto.permanentDistrict?.trim() ?? member.permanentDistrict,
+      specialty:
+        dto.specialty === undefined ? member.specialty : dto.specialty?.trim() || null,
+      notes: dto.notes?.trim() ?? member.notes,
+      profileImageUrl:
+        dto.profileImageUrl === undefined
+          ? member.profileImageUrl
+          : dto.profileImageUrl?.trim() || null,
+      isActive: dto.isActive ?? member.isActive,
+    });
+
+    const saved = await this.memberRepo.save(member);
 
     this.eventEmitter.emit('directory.member.updated', {
-      memberId: member.id,
-      joinRequestId: join.id,
-      fullNameEn: member.fullNameEn,
-      email: member.email,
+      memberId: saved.id,
+      joinRequestId: saved.joinRequestId,
+      fullNameEn: saved.fullNameEn,
+      email: saved.email,
     } satisfies DirectoryMemberUpdatedPayload);
+
+    return saved;
   }
 
-  private snapshotFromJoinRequest(join: JoinRequestEntity) {
+  async remove(id: string) {
+    const member = await this.findOne(id);
+
+    await this.memberRepo.remove(member);
+
+    this.eventEmitter.emit('directory.member.deleted', {
+      memberId: member.id,
+      joinRequestId: member.joinRequestId,
+      fullNameEn: member.fullNameEn,
+      email: member.email,
+    } satisfies DirectoryMemberDeletedPayload);
+
     return {
-      fullNameBn: join.fullNameBn,
-      fullNameEn: join.fullNameEn,
-      fatherName: join.fatherName,
-      motherName: join.motherName,
-      dateOfBirth: join.dateOfBirth,
-      nationalId: join.nationalId,
-      medicalRegNo: join.medicalRegNo,
-      membershipType: join.membershipType,
-      email: join.email,
-      mobile: join.mobile,
-      phone: join.phone,
-      presentVillage: join.presentVillage,
-      presentPost: join.presentPost,
-      presentThana: join.presentThana,
-      presentDistrict: join.presentDistrict,
-      permanentVillage: join.permanentVillage,
-      permanentPost: join.permanentPost,
-      permanentThana: join.permanentThana,
-      permanentDistrict: join.permanentDistrict,
-      specialty: join.specialty,
-      educationEntries: join.educationEntries,
-      workplaceTypes: join.workplaceTypes,
-      entryFee: join.entryFee,
-      annualFee: join.annualFee,
-      lifetimeFee: join.lifetimeFee,
-      declarationAccepted: join.declarationAccepted,
-      notes: join.notes,
-      profileImageUrl: join.profileImageUrl,
+      success: true,
+      message: 'Member deleted successfully',
     };
+  }
+
+  private ensureNumericId(id: string): void {
+    if (!/^\d+$/.test(id)) {
+      throw new BadRequestException('Invalid id format');
+    }
   }
 }

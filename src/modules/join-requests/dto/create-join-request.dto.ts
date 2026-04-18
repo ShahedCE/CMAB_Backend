@@ -2,18 +2,41 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsDateString,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
+  IsUrl,
   MaxLength,
-  Min,
-  MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateMemberDto {
+export class EducationEntryDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  degree!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(160)
+  institution!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  passingYear!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  result?: string;
+}
+
+export class CreateJoinRequestDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(160)
@@ -34,9 +57,7 @@ export class CreateMemberDto {
   @MaxLength(160)
   motherName!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
+  @IsDateString()
   dateOfBirth!: string;
 
   @IsString()
@@ -114,36 +135,33 @@ export class CreateMemberDto {
   specialty?: string | null;
 
   @IsArray()
-  @ArrayMinSize(0)
-  educationEntries!: unknown[];
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => EducationEntryDto)
+  educationEntries!: EducationEntryDto[];
 
   @IsArray()
-  @ArrayMinSize(0)
-  workplaceTypes!: unknown[];
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  workplaceTypes!: string[];
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  entryFee!: number;
+  @IsNumberString()
+  entryFee!: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  annualFee!: number;
+  @IsNumberString()
+  annualFee!: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  lifetimeFee!: number;
+  @IsNumberString()
+  lifetimeFee!: string;
 
   @IsBoolean()
   declarationAccepted!: boolean;
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   notes!: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl()
   profileImageUrl?: string | null;
 }
