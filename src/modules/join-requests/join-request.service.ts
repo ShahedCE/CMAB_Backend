@@ -29,60 +29,67 @@ export class JoinRequestsService {
     private readonly membersService: MembersService,
   ) {}
 
-  async create(dto: CreateJoinRequestDto): Promise<JoinRequestEntity> {
-    const normalizedEmail = dto.email.trim().toLowerCase();
+  
+async create(
+  dto: CreateJoinRequestDto,
+  profileImageUrl: string | null,
+  adminId: string | null,
+): Promise<JoinRequestEntity> {
+  const normalizedEmail = dto.email.trim().toLowerCase();
 
-    const existingApprovedMember = await this.dataSource
-      .getRepository(MemberEntity)
-      .findOne({
-        where: { email: normalizedEmail },
-        select: ['id', 'email'],
-      });
-
-    if (existingApprovedMember) {
-      throw new ConflictException('A member already exists with this email');
-    }
-
-    const row = this.joinRequestRepo.create({
-      ...dto,
-      fullNameBn: dto.fullNameBn.trim(),
-      fullNameEn: dto.fullNameEn.trim(),
-      fatherName: dto.fatherName.trim(),
-      motherName: dto.motherName.trim(),
-      nationalId: dto.nationalId.trim(),
-      medicalRegNo: dto.medicalRegNo.trim(),
-      membershipType: dto.membershipType.trim(),
-      email: normalizedEmail,
-      mobile: dto.mobile.trim(),
-      phone: dto.phone?.trim() || null,
-      presentVillage: dto.presentVillage.trim(),
-      presentPost: dto.presentPost.trim(),
-      presentThana: dto.presentThana.trim(),
-      presentDistrict: dto.presentDistrict.trim(),
-      permanentVillage: dto.permanentVillage.trim(),
-      permanentPost: dto.permanentPost.trim(),
-      permanentThana: dto.permanentThana.trim(),
-      permanentDistrict: dto.permanentDistrict.trim(),
-      specialty: dto.specialty?.trim() || null,
-      notes: dto.notes.trim(),
-      profileImageUrl: dto.profileImageUrl?.trim() || null,
-      status: 'pending',
-      reviewedAt: null,
-      reviewedByAdminId: null,
-      rejectionReason: null,
+  const existingApprovedMember = await this.dataSource
+    .getRepository(MemberEntity)
+    .findOne({
+      where: { email: normalizedEmail },
+      select: ['id', 'email'],
     });
 
-    const saved = await this.joinRequestRepo.save(row);
-
-    this.eventEmitter.emit('join_request.created', {
-      joinRequestId: saved.id,
-      fullNameEn: saved.fullNameEn,
-      email: saved.email,
-      createdAt: saved.createdAt,
-    } satisfies JoinRequestCreatedPayload);
-
-    return saved;
+  if (existingApprovedMember) {
+    throw new ConflictException('A member already exists with this email');
   }
+
+  const row = this.joinRequestRepo.create({
+    ...dto,
+    fullNameBn: dto.fullNameBn.trim(),
+    fullNameEn: dto.fullNameEn.trim(),
+    fatherName: dto.fatherName.trim(),
+    motherName: dto.motherName.trim(),
+    nationalId: dto.nationalId.trim(),
+    medicalRegNo: dto.medicalRegNo.trim(),
+    membershipType: dto.membershipType.trim(),
+    email: normalizedEmail,
+    mobile: dto.mobile.trim(),
+    phone: dto.phone?.trim() || null,
+    presentVillage: dto.presentVillage.trim(),
+    presentPost: dto.presentPost.trim(),
+    presentThana: dto.presentThana.trim(),
+    presentDistrict: dto.presentDistrict.trim(),
+    permanentVillage: dto.permanentVillage.trim(),
+    permanentPost: dto.permanentPost.trim(),
+    permanentThana: dto.permanentThana.trim(),
+    permanentDistrict: dto.permanentDistrict.trim(),
+    specialty: dto.specialty?.trim() || null,
+    notes: dto.notes.trim(),
+
+    profileImageUrl: profileImageUrl?.trim() || null,
+
+    status: 'pending',
+    reviewedAt: null,
+    reviewedByAdminId: adminId ?? null,
+    rejectionReason: null,
+  });
+
+  const saved = await this.joinRequestRepo.save(row);
+
+  this.eventEmitter.emit('join_request.created', {
+    joinRequestId: saved.id,
+    fullNameEn: saved.fullNameEn,
+    email: saved.email,
+    createdAt: saved.createdAt,
+  } satisfies JoinRequestCreatedPayload);
+
+  return saved;
+}
 
   async findAll(query: JoinRequestListQueryDto) {
     const page = query.page ?? 1;

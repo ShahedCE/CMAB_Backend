@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -6,14 +7,19 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JoinRequestsService } from './join-request.service';
 import { CreateJoinRequestDto } from './dto/create-join-request.dto';
 import { JoinRequestListQueryDto } from './dto/join-request-list-query.dto';
 import { RejectJoinRequestDto } from './dto/reject-join-request.dto';
+import { multerConfig } from 'src/uploads/multer.config';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
+import * as authRequest from 'src/types/auth-request';
 
 // Replace these with your actual auth guards/decorators
 // import { RolesGuard } from '../auth/guards/roles.guard';
@@ -23,12 +29,23 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 export class JoinRequestsController {
   constructor(private readonly service: JoinRequestsService) {}
 
-  // Public endpoint
-  @Post()
-  create(@Body() dto: CreateJoinRequestDto) {
-    return this.service.create(dto);
-  }
+@Post()
+@UseInterceptors(
+  FileInterceptor('profileImage', multerConfig('join-requests')),
+)
+create(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() dto: CreateJoinRequestDto,
+  @Req() req:   authRequest.AuthRequest,
+) {
+  const profileImageUrl = file
+    ? `/uploads/join-requests/${file.filename}`
+    : null;
 
+  const adminId = req.user?.id ?? null;
+
+  return this.service.create(dto, profileImageUrl, adminId);
+}
   // Admin only
    @UseGuards(JwtAuthGuard)
   // @Roles('admin')

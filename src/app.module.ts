@@ -18,11 +18,13 @@ import { AdminOtpCodeEntity } from './database/entities/admin-otp-code.entity';
 import { AdminPasswordResetLogEntity } from './database/entities/admin-password-reset-log.entity';
 import { MemberEntity } from './database/entities/member.entity';
 import { JoinRequestsModule } from './modules/join-requests/join-request.module';
+import { ActivityEntity } from './database/entities/activity.entity';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     AuthModule, ContactModule, ActivitiesModule, 
-    MembersModule, NotificationsModule,JoinRequestsModule,
+    MembersModule, NotificationsModule,
+    JoinRequestsModule,ActivitiesModule,
 
     
     //.env files are globally available throughout the application.
@@ -58,9 +60,10 @@ import { JoinRequestsModule } from './modules/join-requests/join-request.module'
           AdminOtpCodeEntity,
           AdminPasswordResetLogEntity,
           MemberEntity,
+          ActivityEntity
         ],
         autoLoadEntities: false, //automatic load entities
-        synchronize: false,
+        synchronize: true, //auto sync entities with db (disable in production)
         logging: configService.get<boolean>('DB_LOGGING'),
       }),
     }),

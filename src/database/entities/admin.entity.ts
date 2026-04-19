@@ -12,6 +12,7 @@ import { ContactMessageEntity } from './contact-message.entity';
 import { NotificationEntity } from './notification.entity';
 import { AdminOtpCodeEntity } from './admin-otp-code.entity';
 import { AdminPasswordResetLogEntity } from './admin-password-reset-log.entity';
+import { ActivityEntity } from './activity.entity';
 
 @Entity({ name: 'admins' })
 @Index('idx_admins_email', ['email']) //
@@ -63,6 +64,9 @@ export class AdminEntity {
     (passwordResetLog) => passwordResetLog.admin,
   )
   passwordResetLogs!: AdminPasswordResetLogEntity[];
+  //admin activities
+  @OneToMany(() => ActivityEntity, (activity) => activity.createdByAdmin)
+activities!: ActivityEntity[];
 
   @BeforeInsert()
   private setCreatedAt(): void {

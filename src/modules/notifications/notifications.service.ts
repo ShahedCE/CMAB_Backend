@@ -13,6 +13,7 @@ import type {
   DirectoryMemberDeletedPayload,
   DirectoryMemberUpdatedPayload,
 } from '../members/member.events';
+import type{ContactCreatedPayload} from '../contact/contact.service'
 
 @Injectable()
 export class NotificationsService {
@@ -160,6 +161,29 @@ export class NotificationsService {
         joinRequestId: payload.joinRequestId,
         fullNameEn: payload.fullNameEn,
         email: payload.email,
+      },
+      isRead: false,
+      readAt: null,
+    });
+
+    await this.notificationRepository.save(row);
+  }
+  //Contact event
+  @OnEvent('contact.created')
+  async handleContactCreated(
+    payload: ContactCreatedPayload,
+  ): Promise<void> {
+    const row = this.notificationRepository.create({
+      adminId: null,
+      type: 'contact',
+      title: 'New contact message received',
+      body: `${payload.name} (${payload.email})`,
+      sourceType: 'contact_message',
+      sourceId: payload.id,
+      meta: {
+        name: payload.name,
+        email: payload.email,
+        createdAt: payload.createdAt.toISOString(),
       },
       isRead: false,
       readAt: null,

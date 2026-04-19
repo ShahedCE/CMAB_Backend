@@ -26,9 +26,10 @@ export class MembersService {
   ) {}
 
   //Implementing manual member creation
-async createMember(
+async create(
   dto: CreateMemberDto,
   adminId: string,
+  profileImageUrl: string | null,
 ): Promise<MemberEntity> {
   const normalizedEmail = dto.email.trim().toLowerCase();
 
@@ -68,7 +69,7 @@ async createMember(
     lifetimeFee: dto.lifetimeFee.toFixed(2),
     declarationAccepted: dto.declarationAccepted,
     notes: dto.notes.trim(),
-    profileImageUrl: dto.profileImageUrl?.trim() || null,
+    profileImageUrl: profileImageUrl?.trim() || null,
     joinRequestId: null,
     approvedAt: new Date(),
     approvedByAdminId: adminId,
@@ -86,6 +87,8 @@ async createMember(
 
   return saved;
 }
+
+
   async createFromApprovedJoinRequest(
     manager: EntityManager,
     joinRequest: JoinRequestEntity,

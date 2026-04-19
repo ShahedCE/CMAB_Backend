@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   MaxLength,
   Min,
   MinLength,
@@ -145,5 +146,6 @@ export class CreateMemberDto {
 
   @IsOptional()
   @IsString()
+  @IsUrl()
   profileImageUrl?: string | null;
 }

@@ -9,12 +9,17 @@ import {
   UseGuards,
   Post,
   Req,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MembersService } from './members.service';
 import { MemberListQueryDto } from './dto/member-list-query.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateMemberDto } from './dto/create-member.dto';
+import { multerConfig } from 'src/uploads/multer.config';
+import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 
 // Admin only
 // @Roles('admin')
@@ -23,14 +28,28 @@ export class MembersController {
   constructor(private readonly membersService: MembersService) {}
 
   //Manual member Creation endpoint for admins.
-@Post()
-@UseGuards(JwtAuthGuard)
-create(
-  @Body() dto: CreateMemberDto,
-  @Req() req: any,
-) {
-  return this.membersService.createMember(dto, req.user.id);
-}
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('profileImage', multerConfig('members')),
+  )
+  create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateMemberDto,
+    @Req() req: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Profile image is required');
+    }
+
+    const profileImageUrl = `/uploads/members/${file.filename}`;
+
+    return this.membersService.create(
+      dto,
+      req.user.id,
+      profileImageUrl,
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get()
