@@ -2,17 +2,39 @@ import {
   ArrayMinSize,
   IsArray,
   IsBoolean,
+  IsDateString,
   IsEmail,
   IsNotEmpty,
-  IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
   IsUrl,
   MaxLength,
-  Min,
-  MinLength,
+  ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type, plainToInstance } from 'class-transformer';
+
+export class EducationEntryDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(120)
+  degree!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(160)
+  institution!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  passingYear!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  result?: string;
+}
 
 export class CreateMemberDto {
   @IsString()
@@ -35,9 +57,7 @@ export class CreateMemberDto {
   @MaxLength(160)
   motherName!: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
+  @IsDateString()
   dateOfBirth!: string;
 
   @IsString()
@@ -114,38 +134,54 @@ export class CreateMemberDto {
   @MaxLength(150)
   specialty?: string | null;
 
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? plainToInstance(EducationEntryDto, parsed)
+        : parsed;
+    }
+    return Array.isArray(value)
+      ? plainToInstance(EducationEntryDto, value)
+      : value;
+  })
   @IsArray()
-  @ArrayMinSize(0)
-  educationEntries!: unknown[];
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => EducationEntryDto)
+  educationEntries!: EducationEntryDto[];
 
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   @IsArray()
-  @ArrayMinSize(0)
-  workplaceTypes!: unknown[];
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  workplaceTypes!: string[];
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  entryFee!: number;
+  @IsNumberString()
+  entryFee!: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  annualFee!: number;
+  @IsNumberString()
+  annualFee!: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  lifetimeFee!: number;
+  @IsNumberString()
+  lifetimeFee!: string;
 
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
   @IsBoolean()
   declarationAccepted!: boolean;
 
   @IsString()
-  @MinLength(1)
+  @IsNotEmpty()
   notes!: string;
 
   @IsOptional()
-  @IsString()
   @IsUrl()
   profileImageUrl?: string | null;
 }

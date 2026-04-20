@@ -64,9 +64,9 @@ async create(
     specialty: dto.specialty?.trim() || null,
     educationEntries: dto.educationEntries,
     workplaceTypes: dto.workplaceTypes,
-    entryFee: dto.entryFee.toFixed(2),
-    annualFee: dto.annualFee.toFixed(2),
-    lifetimeFee: dto.lifetimeFee.toFixed(2),
+    entryFee: dto.entryFee,
+    annualFee: dto.annualFee,
+    lifetimeFee: dto.lifetimeFee,
     declarationAccepted: dto.declarationAccepted,
     notes: dto.notes.trim(),
     profileImageUrl: profileImageUrl?.trim() || null,
@@ -90,8 +90,8 @@ async create(
 
 
   async createFromApprovedJoinRequest(
-    manager: EntityManager,
-    joinRequest: JoinRequestEntity,
+    manager: EntityManager, // Using the transaction's EntityManager for all DB operations in this method
+    joinRequest: JoinRequestEntity, //
     adminId: string | null,
   ): Promise<MemberEntity> {
     const repo = manager.getRepository(MemberEntity);
@@ -148,7 +148,7 @@ async create(
       isActive: true,
     });
 
-    const saved = await repo.save(row);
+    const saved = await repo.save(row); // Using the transaction's EntityManager to save the new member
 
     this.eventEmitter.emit('directory.member.added', {
       memberId: saved.id,

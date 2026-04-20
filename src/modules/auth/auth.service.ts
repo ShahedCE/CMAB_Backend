@@ -176,6 +176,16 @@ export class AuthService {
     return { message: 'Password reset successful.' };
   }
 
+  /**
+   * Handles logout by instructing the client to remove the JWT token.
+   * For stateless JWT auth, this method does not revoke tokens on the server.
+   * If using cookies, provide a Set-Cookie header to clear token on client.
+   */
+  async logout() {
+    // Stateless JWT logout: client must delete token.
+    return { message: 'Logged out successfully. Please remove token on client.' };
+  }
+
   private async getLatestActiveOtp(email: string): Promise<AdminOtpCodeEntity | null> {
     const now = new Date();
     return this.otpRepository

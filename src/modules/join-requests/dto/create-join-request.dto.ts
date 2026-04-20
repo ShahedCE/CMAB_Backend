@@ -12,7 +12,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type, plainToInstance } from 'class-transformer';
 
 export class EducationEntryDto {
   @IsString()
@@ -134,12 +134,26 @@ export class CreateJoinRequestDto {
   @MaxLength(150)
   specialty?: string | null;
 
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? plainToInstance(EducationEntryDto, parsed)
+        : parsed;
+    }
+    return Array.isArray(value)
+      ? plainToInstance(EducationEntryDto, value)
+      : value;
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => EducationEntryDto)
   educationEntries!: EducationEntryDto[];
 
+  @Transform(({ value }) =>
+    typeof value === 'string' ? JSON.parse(value) : value,
+  )
   @IsArray()
   @ArrayMinSize(1)
   @IsString({ each: true })
@@ -154,6 +168,12 @@ export class CreateJoinRequestDto {
   @IsNumberString()
   lifetimeFee!: string;
 
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
   @IsBoolean()
   declarationAccepted!: boolean;
 
