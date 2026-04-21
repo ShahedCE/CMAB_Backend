@@ -63,7 +63,7 @@ import { ActivityEntity } from './database/entities/activity.entity';
           ActivityEntity
         ],
         autoLoadEntities: false, //automatic load entities
-        synchronize: true, //auto sync entities with db (disable in production)
+        synchronize: false, //auto sync entities with db (disable in production)
         logging: configService.get<boolean>('DB_LOGGING'),
       }),
     }),

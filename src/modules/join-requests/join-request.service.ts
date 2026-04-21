@@ -198,7 +198,13 @@ async create(
 
     return result;
   }
-
+ //find pending join requests
+ async findPendingJoinRequests() {
+  return this.joinRequestRepo.find({
+    where: { status: 'pending' },
+  });
+ }
+ 
   async reject(id: string, adminId: string, dto: RejectJoinRequestDto) {
     this.ensureNumericId(id);
     this.ensureNumericId(adminId);

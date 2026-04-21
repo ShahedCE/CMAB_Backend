@@ -36,7 +36,8 @@ export class AuthController {
       userAgent: req.headers['user-agent'] ?? null,
     });
   }
-
+ 
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   async logout() {
