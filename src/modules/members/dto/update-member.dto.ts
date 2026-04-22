@@ -9,7 +9,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { EducationEntryDto } from '../../join-requests/dto/create-join-request.dto';
 
 export class UpdateMemberDto {
@@ -99,12 +99,32 @@ export class UpdateMemberDto {
   specialty?: string | null;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => EducationEntryDto)
   educationEntries?: EducationEntryDto[];
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  })
   @IsArray()
   @IsString({ each: true })
   workplaceTypes?: string[];
@@ -130,6 +150,11 @@ export class UpdateMemberDto {
   profileImageUrl?: string | null;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
   @IsBoolean()
   isActive?: boolean;
 }

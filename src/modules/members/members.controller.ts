@@ -33,7 +33,7 @@ export class MembersController {
   @UseInterceptors(
     FileInterceptor('profileImage', multerConfig('members')),
   )
-  create(
+  async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: CreateMemberDto,
     @Req() req: any,
@@ -53,24 +53,37 @@ export class MembersController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() query: MemberListQueryDto) {
+  async findAll(@Query() query: MemberListQueryDto) {
     return this.membersService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.membersService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)  
+  //Update
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateMemberDto) {
+  @UseInterceptors(
+    FileInterceptor('profileImage', multerConfig('members')),
+  )
+  async update(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: UpdateMemberDto,
+  ) {
+    if (file) {
+      dto.profileImageUrl = `/uploads/members/${file.filename}`;
+    }
+  
     return this.membersService.update(id, dto);
   }
+
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.membersService.remove(id);
   }
 }
