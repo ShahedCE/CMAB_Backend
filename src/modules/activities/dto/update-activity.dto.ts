@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class UpdateActivityDto {
   @IsOptional()
@@ -17,4 +17,8 @@ export class UpdateActivityDto {
   @IsOptional()
   @IsDateString()
   date?: string;
+  
+  @IsOptional()
+  @IsUrl()
+  image?: string | null;
 }

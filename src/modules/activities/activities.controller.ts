@@ -13,12 +13,12 @@ export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 
   @Get()
-  findAll(@Query() query: ActivityListQueryDto) {
+  async findAll(@Query() query: ActivityListQueryDto) {
     return this.activitiesService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.activitiesService.findOne(id);
   }
 
@@ -29,7 +29,7 @@ export class ActivitiesController {
  @Post()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(FileInterceptor('image', multerConfig('activities')))
-create(
+async create(
   @UploadedFile() file: Express.Multer.File,
   @Body() dto: CreateActivityDto,
   @Req() req: any,
@@ -44,7 +44,7 @@ create(
  @Patch(':id')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(FileInterceptor('image', multerConfig('activities')))
-update(
+async update(
   @Param('id') id: string,
   @UploadedFile() file: Express.Multer.File,
   @Body() dto: UpdateActivityDto,
@@ -61,7 +61,7 @@ update(
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+ async remove(@Param('id') id: string) {
     return this.activitiesService.remove(id);
   }
 }
