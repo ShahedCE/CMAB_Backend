@@ -8,16 +8,9 @@ import { Repository } from 'typeorm';
 import { NotificationEntity } from '../../database/entities/notification.entity';
 
 import type {
-  JoinRequestApprovedPayload,
   JoinRequestCreatedPayload,
-  JoinRequestRejectedPayload,
 } from '../join-requests/join-request.events';
 
-import type {
-  DirectoryMemberAddedPayload,
-  DirectoryMemberDeletedPayload,
-  DirectoryMemberUpdatedPayload,
-} from '../members/member.events';
 
 import type { ContactCreatedPayload } from '../contact/contact.service';
 
@@ -56,128 +49,6 @@ export class NotificationsService {
     );
   }
 
-  @OnEvent('join_request.approved')
-  async handleJoinRequestApproved(
-    payload: JoinRequestApprovedPayload,
-  ) {
-    await this.repo.save(
-      this.repo.create({
-        adminId: payload.approvedByAdminId,
-        type: 'join_request',
-        title: 'Membership application approved',
-        body: `${payload.fullNameEn} (${payload.email})`,
-        sourceType: 'join_request',
-        sourceId: payload.joinRequestId,
-        meta: {
-          joinRequestId: payload.joinRequestId,
-          memberId: payload.memberId,
-          fullNameEn: payload.fullNameEn,
-          email: payload.email,
-          approvedAt: payload.approvedAt.toISOString(),
-          approvedByAdminId: payload.approvedByAdminId,
-        },
-        isRead: false,
-        readAt: null,
-      }),
-    );
-  }
-
-  @OnEvent('join_request.rejected')
-  async handleJoinRequestRejected(
-    payload: JoinRequestRejectedPayload,
-  ) {
-    await this.repo.save(
-      this.repo.create({
-        adminId: null,
-        type: 'join_request',
-        title: 'Membership application rejected',
-        body: `${payload.fullNameEn} (${payload.email})`,
-        sourceType: 'join_request',
-        sourceId: payload.joinRequestId,
-        meta: {
-          joinRequestId: payload.joinRequestId,
-          fullNameEn: payload.fullNameEn,
-          email: payload.email,
-          rejectedAt: payload.rejectedAt.toISOString(),
-          reason: payload.reason,
-        },
-        isRead: false,
-        readAt: null,
-      }),
-    );
-  }
-
-  @OnEvent('directory.member.added')
-  async handleDirectoryMemberAdded(
-    payload: DirectoryMemberAddedPayload,
-  ) {
-    await this.repo.save(
-      this.repo.create({
-        adminId: null,
-        type: 'member',
-        title: 'Member added to directory',
-        body: `${payload.fullNameEn} (${payload.email})`,
-        sourceType: 'member',
-        sourceId: payload.memberId,
-        meta: {
-          memberId: payload.memberId,
-          joinRequestId: payload.joinRequestId,
-          fullNameEn: payload.fullNameEn,
-          email: payload.email,
-        },
-        isRead: false,
-        readAt: null,
-      }),
-    );
-  }
-
-  @OnEvent('directory.member.updated')
-  async handleDirectoryMemberUpdated(
-    payload: DirectoryMemberUpdatedPayload,
-  ) {
-    await this.repo.save(
-      this.repo.create({
-        adminId: null,
-        type: 'member',
-        title: 'Member directory updated',
-        body: `${payload.fullNameEn} (${payload.email})`,
-        sourceType: 'member',
-        sourceId: payload.memberId,
-        meta: {
-          memberId: payload.memberId,
-          joinRequestId: payload.joinRequestId,
-          fullNameEn: payload.fullNameEn,
-          email: payload.email,
-        },
-        isRead: false,
-        readAt: null,
-      }),
-    );
-  }
-
-  @OnEvent('directory.member.deleted')
-  async handleDirectoryMemberDeleted(
-    payload: DirectoryMemberDeletedPayload,
-  ) {
-    await this.repo.save(
-      this.repo.create({
-        adminId: null,
-        type: 'member',
-        title: 'Member removed from directory',
-        body: `${payload.fullNameEn} (${payload.email})`,
-        sourceType: 'member',
-        sourceId: payload.memberId,
-        meta: {
-          memberId: payload.memberId,
-          joinRequestId: payload.joinRequestId,
-          fullNameEn: payload.fullNameEn,
-          email: payload.email,
-        },
-        isRead: false,
-        readAt: null,
-      }),
-    );
-  }
 
   @OnEvent('contact.created')
   async handleContactCreated(payload: ContactCreatedPayload) {

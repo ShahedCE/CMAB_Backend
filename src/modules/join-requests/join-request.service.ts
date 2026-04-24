@@ -14,9 +14,7 @@ import { CreateJoinRequestDto } from './dto/create-join-request.dto';
 import { JoinRequestListQueryDto } from './dto/join-request-list-query.dto';
 import { RejectJoinRequestDto } from './dto/reject-join-request.dto';
 import type {
-  JoinRequestApprovedPayload,
   JoinRequestCreatedPayload,
-  JoinRequestRejectedPayload,
 } from './join-request.events';
 
 @Injectable()
@@ -186,16 +184,6 @@ async create(
 
       return { row, member };
     });
-
-    this.eventEmitter.emit('join_request.approved', {
-      joinRequestId: result.row.id,
-      memberId: result.member.id,
-      fullNameEn: result.row.fullNameEn,
-      email: result.row.email,
-      approvedAt: result.member.approvedAt,
-      approvedByAdminId: result.member.approvedByAdminId,
-    } satisfies JoinRequestApprovedPayload);
-
     return result;
   }
  //find pending join requests
@@ -223,15 +211,6 @@ async create(
     row.rejectionReason = dto.reason?.trim() || null;
 
     const saved = await this.joinRequestRepo.save(row);
-
-    this.eventEmitter.emit('join_request.rejected', {
-      joinRequestId: saved.id,
-      fullNameEn: saved.fullNameEn,
-      email: saved.email,
-      rejectedAt: new Date(),
-      reason: saved.rejectionReason,
-    } satisfies JoinRequestRejectedPayload);
-
     return saved;
   }
 

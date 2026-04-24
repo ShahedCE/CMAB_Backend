@@ -4,16 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { JoinRequestEntity } from '../../database/entities/join-request.entity';
 import { MemberEntity } from '../../database/entities/member.entity';
 import { MemberListQueryDto } from './dto/member-list-query.dto';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { DirectoryMemberAddedPayload,
-   DirectoryMemberDeletedPayload,
-    DirectoryMemberUpdatedPayload } from './member.events';
 import { CreateMemberDto } from './dto/create-member.dto';
 
 
@@ -22,7 +18,7 @@ export class MembersService {
   constructor(
     @InjectRepository(MemberEntity)
     private readonly memberRepo: Repository<MemberEntity>,
-    private readonly eventEmitter: EventEmitter2,
+   
   ) {}
 
   //Implementing manual member creation
@@ -77,13 +73,6 @@ async create(
   });
 
   const saved = await this.memberRepo.save(member);
-
-  this.eventEmitter.emit('directory.member.added', {
-    memberId: saved.id,
-    joinRequestId: saved.joinRequestId,
-    fullNameEn: saved.fullNameEn,
-    email: saved.email,
-  } satisfies DirectoryMemberAddedPayload);
 
   return saved;
 }
@@ -149,13 +138,6 @@ async create(
     });
 
     const saved = await repo.save(row); // Using the transaction's EntityManager to save the new member
-
-    this.eventEmitter.emit('directory.member.added', {
-      memberId: saved.id,
-      joinRequestId: saved.joinRequestId || null,
-      fullNameEn: saved.fullNameEn,
-      email: saved.email,
-    } satisfies DirectoryMemberAddedPayload);
 
     return saved;
   }
@@ -268,13 +250,6 @@ async create(
 
     const saved = await this.memberRepo.save(member);
 
-    this.eventEmitter.emit('directory.member.updated', {
-      memberId: saved.id,
-      joinRequestId: saved.joinRequestId,
-      fullNameEn: saved.fullNameEn,
-      email: saved.email,
-    } satisfies DirectoryMemberUpdatedPayload);
-
     return saved;
   }
 
@@ -282,13 +257,6 @@ async create(
     const member = await this.findOne(id);
 
     await this.memberRepo.remove(member);
-
-    this.eventEmitter.emit('directory.member.deleted', {
-      memberId: member.id,
-      joinRequestId: member.joinRequestId,
-      fullNameEn: member.fullNameEn,
-      email: member.email,
-    } satisfies DirectoryMemberDeletedPayload);
 
     return {
       success: true,

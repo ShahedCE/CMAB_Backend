@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUrl,
   MaxLength,
@@ -25,4 +26,8 @@ export class CreateActivityDto {
 
   @IsDateString()
   date!: string;
+
+ 
+  @IsUrl()
+  image?: string | null;
 }

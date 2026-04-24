@@ -51,13 +51,11 @@ export class MembersController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(@Query() query: MemberListQueryDto) {
     return this.membersService.findAll(query);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.membersService.findOne(id);
