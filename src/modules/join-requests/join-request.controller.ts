@@ -48,7 +48,7 @@ create(
 }
   // Admin only
    @UseGuards(JwtAuthGuard)
-  // @Roles('admin')
+  
   @Get()
   findAll(@Query() query: JoinRequestListQueryDto) {
     return this.service.findAll(query);
@@ -56,14 +56,14 @@ create(
 
   // Admin only
    @UseGuards(JwtAuthGuard)
-  // @Roles('admin')
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
   }
 
   // Admin only
-   // @Roles('admin')
+ 
    @UseGuards(JwtAuthGuard)
 @Patch(':id/approve')
 approve(@Param('id') id: string, @Req() req: any) {
@@ -74,7 +74,7 @@ approve(@Param('id') id: string, @Req() req: any) {
 
   // Admin only
    @UseGuards(JwtAuthGuard)
-  // @Roles('admin')
+
   @Patch(':id/reject')
   reject(
     @Param('id') id: string,
