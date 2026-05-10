@@ -17,7 +17,7 @@ async function bootstrap() {
    app.useStaticAssets(join(__dirname, '..', 'uploads'), { //Serve static files from the 'uploads' directory
     prefix: '/uploads/',
   });
-  console.log(`Server is running on port ${process.env.PORT ?? 3000}`);
-  await app.listen(process.env.PORT ?? 3000);
+  console.log(`Server is running on port ${process.env.PORT ?? 4000}`);
+  await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

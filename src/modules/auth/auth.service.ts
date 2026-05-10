@@ -25,6 +25,7 @@ type RequestMeta = {
 
 @Injectable()
 export class AuthService {
+
   private static readonly OTP_LENGTH = 6;
   private static readonly OTP_MAX_ATTEMPTS = 3;
 
@@ -39,6 +40,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  
   async login(body: LoginDto) {
     const admin = await this.adminRepository.findOne({ //Finding Existing Admin if exists
       where: { email: body.email },

@@ -18,7 +18,5 @@ export class UpdateActivityDto {
   @IsDateString()
   date?: string;
   
-  @IsOptional()
-  @IsUrl()
-  image?: string | null;
+
 }

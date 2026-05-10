@@ -28,6 +28,5 @@ export class CreateActivityDto {
   date!: string;
 
  
-  @IsUrl()
-  image?: string | null;
+ 
 }
