@@ -21,12 +21,14 @@ import { JoinRequestsModule } from './modules/join-requests/join-request.module'
 import { ActivityEntity } from './database/entities/activity.entity';
 import { ArchiveModule } from './modules/archive/archive.module';
 import { ArchiveEntity } from './database/entities/archive.entity';
+import { MessagesModule } from './modules/messages/messages.module';
+import { MessageEntity } from './database/entities/message.entity';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     AuthModule, ContactModule, ActivitiesModule, 
     MembersModule, NotificationsModule,
-    JoinRequestsModule,ActivitiesModule, ArchiveModule,
+    JoinRequestsModule,ActivitiesModule, ArchiveModule, MessagesModule,
 
     
     //.env files are globally available throughout the application.
@@ -63,7 +65,8 @@ import { ArchiveEntity } from './database/entities/archive.entity';
           AdminPasswordResetLogEntity,
           MemberEntity,
           ActivityEntity,
-          ArchiveEntity
+          ArchiveEntity,
+          MessageEntity
         ],
         autoLoadEntities: false, //automatic load entities
         synchronize: configService.get<string>('NODE_ENV') === 'development' ? true : false, //auto sync entities with db (disable in production)
