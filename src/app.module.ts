@@ -23,12 +23,14 @@ import { ArchiveModule } from './modules/archive/archive.module';
 import { ArchiveEntity } from './database/entities/archive.entity';
 import { MessagesModule } from './modules/messages/messages.module';
 import { MessageEntity } from './database/entities/message.entity';
+import { ExecutiveMembersModule } from './modules/executive-members/executive-members.module';
+import { ExecutiveMemberEntity } from './database/entities/executive-member.entity';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
     AuthModule, ContactModule, ActivitiesModule, 
     MembersModule, NotificationsModule,
-    JoinRequestsModule,ActivitiesModule, ArchiveModule, MessagesModule,
+    JoinRequestsModule,ActivitiesModule, ArchiveModule, MessagesModule, ExecutiveMembersModule,
 
     
     //.env files are globally available throughout the application.
@@ -66,7 +68,8 @@ import { MessageEntity } from './database/entities/message.entity';
           MemberEntity,
           ActivityEntity,
           ArchiveEntity,
-          MessageEntity
+          MessageEntity,
+          ExecutiveMemberEntity
         ],
         autoLoadEntities: false, //automatic load entities
         synchronize: configService.get<string>('NODE_ENV') === 'development' ? true : false, //auto sync entities with db (disable in production)
