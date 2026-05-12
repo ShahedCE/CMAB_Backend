@@ -42,31 +42,42 @@ export class ExecutiveMembersController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/executive-members',
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/executive-members',
+      filename: (req, file, cb) => {
+        const randomName = Array(32)
+          .fill(null)
+          .map(() => Math.round(Math.random() * 16).toString(16))
+          .join('');
+
+        cb(null, `${randomName}${extname(file.originalname)}`);
+      },
     }),
-  )
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+        return cb(
+          new BadRequestException('Only JPG, PNG, and GIF images are allowed'),
+          false,
+        );
+      }
+
+      cb(null, true);
+    },
+  }),
+)
   async create(
     @Body() dto: CreateExecutiveMemberDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-          new FileTypeValidator({ fileType: /^(image\/jpe?g|image\/png|image\/gif)$/i }),
-      ],
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+          
+        ],
         fileIsRequired: false,
       }),
     )
-    file?: Express.Multer.File,
+    file?: Express.Multer.File
   ) {
     if (file) {
       dto.imageUrl = `/uploads/executive-members/${file.filename}`;
@@ -78,32 +89,42 @@ export class ExecutiveMembersController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads/executive-members',
-        filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        },
-      }),
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/executive-members',
+      filename: (req, file, cb) => {
+        const randomName = Array(32)
+          .fill(null)
+          .map(() => Math.round(Math.random() * 16).toString(16))
+          .join('');
+
+        cb(null, `${randomName}${extname(file.originalname)}`);
+      },
     }),
-  )
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+        return cb(
+          new BadRequestException('Only JPG, PNG, and GIF images are allowed'),
+          false,
+        );
+      }
+
+      cb(null, true);
+    },
+  }),
+)
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateExecutiveMemberDto,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-          new FileTypeValidator({ fileType: /^image\/(jpg|jpeg|png|gif)$/ }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
-    file?: Express.Multer.File,
+   @UploadedFile(
+  new ParseFilePipe({
+    validators: [
+      new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+    ],
+    fileIsRequired: false,
+  }),
+)
+file?: Express.Multer.File
   ) {
     if (file) {
       dto.imageUrl = `/uploads/executive-members/${file.filename}`;

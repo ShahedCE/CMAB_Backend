@@ -20,7 +20,8 @@ export class ActivitiesService {
 async create(
   dto: CreateActivityDto,
   adminId: string,
-  imageUrl: string,
+  imageUrl: string | null,
+  imageUrls: string[] = [],
 ): Promise<ActivityEntity> {
 
   this.ensureNumericId(adminId);
@@ -29,7 +30,8 @@ async create(
     title: dto.title.trim(),
     description: dto.description.trim(),
     fullDescription: dto.fullDescription.trim(),
-    image: imageUrl,   // file upload থেকে আসবে
+    image: imageUrl,   // first image as primary
+    images: imageUrls.length > 0 ? imageUrls : null, // all images array
     date: dto.date,
     createdByAdminId: adminId,
   });
@@ -91,6 +93,7 @@ async create(
   dto: UpdateActivityDto,
   adminId: string,
   imageUrl?: string,
+  imageUrls: string[] = [],
 ): Promise<ActivityEntity> {
   this.ensureNumericId(id);
   this.ensureNumericId(adminId);
@@ -110,6 +113,19 @@ async create(
 
   if (imageUrl !== undefined) {
     row.image = imageUrl;
+  }
+
+  if (imageUrls.length > 0) {
+    row.images = imageUrls;
+  }
+
+  // Handle individual image updates from DTO
+  if (dto.image !== undefined) {
+    row.image = dto.image;
+  }
+
+  if (dto.images !== undefined) {
+    row.images = dto.images;
   }
 
   return this.activityRepository.save(row);

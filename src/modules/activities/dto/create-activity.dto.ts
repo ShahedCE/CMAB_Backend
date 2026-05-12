@@ -27,6 +27,12 @@ export class CreateActivityDto {
   @IsDateString()
   date!: string;
 
- 
- 
+  @IsOptional()
+  @IsString()
+  image?: string | null;
+
+  @IsOptional()
+  @IsString({ each: true })
+  images?: string[] | null;
+
 }

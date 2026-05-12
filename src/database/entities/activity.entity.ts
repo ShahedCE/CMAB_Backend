@@ -26,8 +26,11 @@ export class ActivityEntity {
   @Column({ type: 'text', name: 'full_description' })
   fullDescription!: string;
 
-  @Column({ type: 'text', name: 'image_url' })
-  image!: string;
+  @Column({ type: 'text', name: 'image_url', nullable: true })
+  image!: string | null;
+
+  @Column({ type: 'jsonb', name: 'images', nullable: true })
+  images!: string[] | null;
 
   @Column({ type: 'date' })
   date!: string;

@@ -1,12 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseGuards, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Query, Body, UseGuards, UseInterceptors, UploadedFile, UploadedFiles, Req } from '@nestjs/common';
 import type { Express } from 'express';  // Use 'import type' for decorator metadata compliance
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { multerConfig } from 'src/uploads/multer.config';
-import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors/file.interceptor';
 import { ActivityListQueryDto } from './dto/activity-list-query.dto';
 import { ActivitiesService } from './activities.service';
+import { FilesInterceptor } from '@nestjs/platform-express/multer/interceptors/files.interceptor';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -28,35 +28,35 @@ export class ActivitiesController {
   //Create Activity
  @Post()
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(FileInterceptor('image', multerConfig('activities')))
+@UseInterceptors(FilesInterceptor('images', 5, multerConfig('activities')))
 async create(
-  @UploadedFile() file: Express.Multer.File,
+  @UploadedFiles() files: Express.Multer.File[],
   @Body() dto: CreateActivityDto,
   @Req() req: any,
 ) {
   const adminId = req.user.sub;
 
-  const imageUrl = `/uploads/activities/${file.filename}`;
+  const imageUrls = files?.map(file => `/uploads/activities/${file.filename}`) || [];
+  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
 
-  return this.activitiesService.create(dto, adminId, imageUrl);
+  return this.activitiesService.create(dto, adminId, imageUrl, imageUrls);
 }
 
  @Patch(':id')
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(FileInterceptor('image', multerConfig('activities')))
+@UseInterceptors(FilesInterceptor('images', 5, multerConfig('activities')))
 async update(
   @Param('id') id: string,
-  @UploadedFile() file: Express.Multer.File,
+  @UploadedFiles() files: Express.Multer.File[],
   @Body() dto: UpdateActivityDto,
   @Req() req: any,
 ) {
   const adminId = String(req.user.sub);
 
-  const imageUrl = file
-    ? `/uploads/activities/${file.filename}`
-    : undefined;
+  const imageUrls = files?.map(file => `/uploads/activities/${file.filename}`) || [];
+  const imageUrl = imageUrls.length > 0 ? imageUrls[0] : undefined;
 
-  return this.activitiesService.update(id, dto, adminId, imageUrl);
+  return this.activitiesService.update(id, dto, adminId, imageUrl, imageUrls);
 }
 
   @UseGuards(JwtAuthGuard)
