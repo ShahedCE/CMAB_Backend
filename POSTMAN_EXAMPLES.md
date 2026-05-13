@@ -65,7 +65,7 @@ category: "committee"
 year: "2023-2024"
 description: "Executive committee members for the session 2023-2024"
 coverImage: [file: committee-group-photo.jpg]
-membersJson: "[{\"name\":\"Dr. Ahmed Rahman\",\"designation\":\"President\",\"photoUrl\":\"/uploads/archive/president.jpg\"},{\"name\":\"Prof. Fatema Khatun\",\"designation\":\"Vice President\",\"photoUrl\":\"/uploads/archive/vice-president.jpg\"},{\"name\":\"Mr. Karim Uddin\",\"designation\":\"General Secretary\",\"photoUrl\":\"/uploads/archive/secretary.jpg\"}]"
+membersJson: ation\":\"Vice President\",\"photoUrl\":\"/uploads/archive/vice-president.jp"[{\"name\":\"Dr. Ahmed Rahman\",\"designation\":\"President\",\"photoUrl\":\"/uploads/archive/president.jpg\"},{\"name\":\"Prof. Fatema Khatun\",\"designg\"},{\"name\":\"Mr. Karim Uddin\",\"designation\":\"General Secretary\",\"photoUrl\":\"/uploads/archive/secretary.jpg\"}]"
 isPublished: "true"
 ```
 

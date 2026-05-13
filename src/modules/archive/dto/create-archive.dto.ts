@@ -29,8 +29,8 @@ photoUrl?: string;
 }
 
 export class ImageDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   imageUrl!: string;
 
   @IsOptional()
@@ -74,11 +74,9 @@ export class CreateArchiveDto {
   caption?: string;
 
   @IsOptional()
-  @IsUrl()
   coverImageUrl?: string;
 
   @IsOptional()
-  @IsUrl()
   fileUrl?: string;
 
  @Transform(({ value }) => {

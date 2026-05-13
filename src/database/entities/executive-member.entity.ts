@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+
 @Entity({ name: 'executive_members' })
 @Index('idx_executive_members_created_at', ['createdAt'])
 @Index('idx_executive_members_is_active', ['isActive'])

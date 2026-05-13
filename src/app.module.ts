@@ -30,7 +30,8 @@ import { ExecutiveMemberEntity } from './database/entities/executive-member.enti
     EventEmitterModule.forRoot(),
     AuthModule, ContactModule, ActivitiesModule, 
     MembersModule, NotificationsModule,
-    JoinRequestsModule,ActivitiesModule, ArchiveModule, MessagesModule, ExecutiveMembersModule,
+    JoinRequestsModule,ActivitiesModule, ArchiveModule,
+     MessagesModule, ExecutiveMembersModule,
 
     
     //.env files are globally available throughout the application.
