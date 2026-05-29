@@ -45,11 +45,6 @@ export class CreateJoinRequestDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(160)
-  fullNameEn!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(160)
   fatherName!: string;
 
   @IsString()

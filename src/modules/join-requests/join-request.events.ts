@@ -1,6 +1,6 @@
 export type JoinRequestCreatedPayload = {
   joinRequestId: string;
-  fullNameEn: string;
+  fullName: string;
   email: string;
   createdAt: Date;
 };

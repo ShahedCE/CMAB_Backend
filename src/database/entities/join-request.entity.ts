@@ -27,9 +27,6 @@ export class JoinRequestEntity {
   @Column({ type: 'varchar', length: 160, name: 'full_name_bn' })
   fullNameBn!: string;
 
-  @Column({ type: 'varchar', length: 160, name: 'full_name_en' })
-  fullNameEn!: string;
-
   @Column({ type: 'varchar', length: 160, name: 'father_name' })
   fatherName!: string;
 

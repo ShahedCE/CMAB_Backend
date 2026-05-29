@@ -105,7 +105,6 @@ async create(
     const row = repo.create({
       joinRequestId: joinRequest.id,
       fullNameBn: joinRequest.fullNameBn,
-      fullNameEn: joinRequest.fullNameEn,
       fatherName: joinRequest.fatherName,
       motherName: joinRequest.motherName,
       dateOfBirth: joinRequest.dateOfBirth,

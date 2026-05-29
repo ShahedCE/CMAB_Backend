@@ -49,7 +49,6 @@ async create(
   const row = this.joinRequestRepo.create({
     ...dto,
     fullNameBn: dto.fullNameBn.trim(),
-    fullNameEn: dto.fullNameEn.trim(),
     fatherName: dto.fatherName.trim(),
     motherName: dto.motherName.trim(),
     nationalId: dto.nationalId.trim(),
@@ -81,7 +80,7 @@ async create(
 
   this.eventEmitter.emit('join_request.created', {
     joinRequestId: saved.id,
-    fullNameEn: saved.fullNameEn,
+    fullName: saved.fullNameBn,
     email: saved.email,
     createdAt: saved.createdAt,
   } satisfies JoinRequestCreatedPayload);
