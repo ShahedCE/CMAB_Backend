@@ -5,7 +5,7 @@ The CMAB (Community Medical Association of Bangladesh) Website & Administration 
 
 The platform consists of two major modules:
 
-1. Public Website
+## 1. Public Website
 
 A responsive public-facing website where visitors can:
 
@@ -23,7 +23,7 @@ Contact the organization through dedicated communication channels
 
 Access downloadable resources and important documents
 
-2. Administration Panel
+## 2. Administration Panel
 
 A secure administrative dashboard that enables authorized users to manage website content through a centralized interface.
 
@@ -92,9 +92,9 @@ Error handling and loading states
 API-driven content management
 
 
-Technology Stack
+## Technology Stack
 
-Frontend
+### Frontend
 
 Next.js (App Router)
 
@@ -123,14 +123,14 @@ JWT Authentication
 File Upload Management
 
 
-Project Goal
+## Project Goal
 
 
 The primary goal of this project is to provide CMAB with a centralized digital platform that simplifies content management, improves accessibility of organizational information, and creates a scalable foundation for future digital initiatives.
 
 The system allows administrators to manage all website content efficiently while ensuring visitors receive an optimized and user-friendly experience across all devices.
 
-My Contribution
+## My Contribution
 
 As a Full Stack Developer, I contributed to:
 
